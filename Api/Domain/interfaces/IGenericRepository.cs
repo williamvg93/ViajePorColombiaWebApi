@@ -9,7 +9,7 @@ namespace Domain.interfaces
 {
     public interface IGenericRepository<T> where T : BaseEntity
     {
-        Task<T> GetByIdAsync(string id);
+        Task<T> GetByIdAsync(int id);
         Task<IEnumerable<T>> GetAllAsync();
         void Add(T entity);
         void Remove(T entity);
