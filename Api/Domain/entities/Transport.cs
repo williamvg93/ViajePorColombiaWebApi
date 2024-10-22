@@ -9,6 +9,6 @@ namespace Domain.entities
     {
         public string FlightCarries { get; set; }
         public string FlightNumber { get; set; }
-        
+        public ICollection<Flight> Flights {get; set;}
     }
 }
