@@ -1,5 +1,6 @@
 using Persistence.data;
 using Microsoft.EntityFrameworkCore;
+using ApiVPC.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddApplicationServices();
 
 builder.Services.AddDbContext<ApiVpcContext>(options => {
     string connectionStr = builder.Configuration.GetConnectionString("conexMysql");
