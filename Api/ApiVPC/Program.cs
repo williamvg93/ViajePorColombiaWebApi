@@ -10,12 +10,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Agregando Controllers
+builder.Services.AddControllers();
+
 // Agregando AutoMapper al proyecto y configurando para que busque las clases(Perfiles de mapeo) que hereden de Profile 
 builder.Services.AddAutoMapper(Assembly.GetEntryAssembly());
 
 // Agregando Servicios de la carpeta Extensions
 builder.Services.AddApplicationServices();
 
+
+// Agregando configuracion para la conexion a la BD
 builder.Services.AddDbContext<ApiVpcContext>(options => {
     string connectionStr = builder.Configuration.GetConnectionString("conexMysql");
     options.UseMySql(connectionStr, ServerVersion.AutoDetect(connectionStr));
