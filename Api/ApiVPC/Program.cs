@@ -1,6 +1,7 @@
 using Persistence.data;
 using Microsoft.EntityFrameworkCore;
 using ApiVPC.Extensions;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Agregando AutoMapper al proyecto y configurando para que busque las clases(Perfiles de mapeo) que hereden de Profile 
+builder.Services.AddAutoMapper(Assembly.GetEntryAssembly());
+
+// Agregando Servicios de la carpeta Extensions
 builder.Services.AddApplicationServices();
 
 builder.Services.AddDbContext<ApiVpcContext>(options => {
