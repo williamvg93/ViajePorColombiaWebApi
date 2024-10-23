@@ -14,6 +14,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Habilitando al connfiguracion para las politicas Cors
+builder.Services.ConfigureCors();
+
 
 // Agregando AutoMapper al proyecto y configurando para que busque las clases(Perfiles de mapeo) que hereden de Profile 
 builder.Services.AddAutoMapper(Assembly.GetEntryAssembly());
@@ -42,5 +45,7 @@ app.UseHttpsRedirection();
 // Necesario para que se reconozcan lso controlaldores que se crearon 
 app.MapControllers();
 
+//Aplicando las politicas Cors
+app.UseCors("CorsPolicy");
 app.Run();
 

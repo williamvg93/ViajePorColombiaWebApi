@@ -10,6 +10,14 @@ namespace ApiVPC.Extensions
 {
     public static class ApplicationServiceExtencion
     {
+        public static void ConfigureCors(this IServiceCollection services) => services.AddCors(Options =>
+        {
+            Options.AddPolicy("CorsPolicy", builder =>
+                builder.AllowAnyOrigin()  //.WithOrigins("https://dominio.com")
+                .AllowAnyMethod()         //.WithMethods("GET", "POST")
+                .AllowAnyHeader());       //.WithHeaders("accept", "content-type")
+        });
+        
         public static void AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
