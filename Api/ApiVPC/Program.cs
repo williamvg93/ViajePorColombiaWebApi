@@ -7,11 +7,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 // Agregando Controllers
 builder.Services.AddControllers();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 
 // Agregando AutoMapper al proyecto y configurando para que busque las clases(Perfiles de mapeo) que hereden de Profile 
 builder.Services.AddAutoMapper(Assembly.GetEntryAssembly());
@@ -36,5 +38,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Necesario para que se reconozcan lso controlaldores que se crearon 
+app.MapControllers();
+
 app.Run();
 

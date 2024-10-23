@@ -8,5 +8,8 @@ namespace Domain.interfaces
 {
     public interface IFlight : IGenericRepository<Flight>
     {
+        Task<List<Flight>>GetAllFlightsAndTranspors();
+        Task<Flight> GetFlightAndTranspor(int Id);
+        
     }
 }
