@@ -4,122 +4,98 @@ btnsForm = document.querySelectorAll(".btn_funtion");
 mainContainer = document.querySelector("#mainContent");
 
 const GetDataList = async (url) => {
-    console.log("obtyeniendo Data");
+    console.log("obteniendo Data");
     let data = await fetch(url)
     let dataJson = await data.json();
     return await dataJson;
 };
 
-const CrearListas = (data) => {
-    mainContainer.innerHTML = "";
-    mainContainer.innerHTML = `
-            <table class="table" >
-                <thead>
-                    <tr id="cabeceTabla">
-                    </tr>
-                </thead>
-                <tbody id="cuerpoTabla">
-                    <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                    </tr>
-                </tbody>
-            </table>
-    `; 
-  let keysColumns = "";
+const CreateTableList = (data, tableInfo) => {
+  mainContainer.innerHTML = "";
+  let table = document.createElement("table");
+  table.classList.add(
+    "table",
+    "align-middle",
+    "text-center",
+    "caption-top",
+    "table-borderless",
+    "table-dark",
+    "table-striped",
+    "table-hover",
+    "table-responsive"
+  );
 
-  data.forEach((dato) => {
-    keysColumns = Object.keys(dato);
+  let tableCaption = document.createElement("caption");
+  tableCaption.textContent = tableInfo;
+  tableCaption.classList.add("fs-5");
+
+  let tableHeader = document.createElement("thead");
+  tableHeader.classList.add(
+    "border",
+    "border-3",
+    "border-bottom",
+    "border-white",
+    "text-info"
+  );
+
+  let tableBody = document.createElement("tbody");
+  /* tableBody.classList.add("table-primary"); */
+
+  let theaderRow = document.createElement("tr");
+  theaderRow.classList.add("text-info");
+  Object.keys(data[0]).forEach((key) => {
+    let tableTh = document.createElement("th");
+    tableTh.classList.add("text-info");
+    tableTh.textContent = key.toUpperCase();
+    theaderRow.appendChild(tableTh);
   });
 
-  console.log(keysColumns);
-  let cabeceTabla = document.querySelector("#cabeceTabla");
-  let cuerpoTabla = document.querySelector("#cuerpoTabla");
-  
+  tableHeader.appendChild(theaderRow);
 
-  keysColumns.forEach((key) => {
-    cabeceTabla.insertAdjacentHTML(
-      "beforeend",
-      `
-            <th scope="col">${key}</th>
-           `
-    );
-  });
+  data.forEach(elemArray => {
+    let tableRow = document.createElement("tr");
 
-  data.forEach((dat) => {
-     cuerpoTabla.insertAdjacentHTML(
-       "beforeend",
-        `
-            <tr>
-        `
-     );
-    Object.entries(dat).forEach(([key, value]) => {
-      console.log(`Key: ${key}, Value: ${value}`);
-      cuerpoTabla.insertAdjacentHTML(
-        "beforeend",
-        `
-            <td scope="col">${value}</td>
-           `
-      );
+    Object.keys(elemArray).forEach(key => {
+      let tBodyTd = document.createElement("td");
+
+      if (Array.isArray(elemArray[key])) {
+        let flighInfo = "";
+        elemArray[key].forEach((fli, index) => {
+            Object.keys(fli).forEach(subkey => {
+                flighInfo += `<b>${subkey.toUpperCase()}</b> : ${fli[subkey]}</br>`;
+            });
+            flighInfo += `</br>`;
+        });
+        flighInfo = flighInfo.slice(0, -5);
+        tBodyTd.innerHTML = flighInfo.trim();
+      } else {
+        tBodyTd.innerHTML = `${elemArray[key]}`.trim()
+      }
+      tableRow.appendChild(tBodyTd);
     });
-    cuerpoTabla.insertAdjacentHTML(
-      "beforeend",
-      `
-            </tr>
-        `
-    );
+    tableBody.appendChild(tableRow);
   });
 
-  /*           mainContainer.innerHTML = "";
-          mainContainer.innerHTML = `
-            <table class="table">
-                <thead>
-                    <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">First</th>
-                    <th scope="col">Last</th>
-                    <th scope="col">Handle</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                    </tr>
-                    <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                    </tr>
-                    <tr>
-                    <th scope="row">3</th>
-                    <td colspan="2">Larry the Bird</td>
-                    <td>@twitter</td>
-                    </tr>
-                </tbody>
-            </table>
-        `; */
+  table.appendChild(tableCaption);
+  table.appendChild(tableHeader);
+  table.appendChild(tableBody);
+
+  mainContainer.appendChild(table);
 };
 
 
 
-const ListarDatos = (url) => {
-    console.log("listando datos");
-    GetDataList(url)
-    .then(data => {
-        console.log(data);
-        console.log(Object.keys(data).length);
-        CrearListas(data);
+const ListarDatos = (url, tableInfo) => {
+  console.log("listando datos");
+  GetDataList(url)
+    .then((data) => {
+      console.log(data);
+      console.log(Object.keys(data).length);
+      CreateTableList(data, tableInfo);
     })
-    .catch(error => {
-        console.error("Error en la consulta: ", error);
+    .catch((error) => {
+      console.error("Error en la consulta: ", error);
     });
-
 };
 
 
@@ -131,7 +107,7 @@ btnsForm.forEach(btn => {
         switch (e.target.getAttribute("id")) {
           case "vaijesList":
             console.log("este es xD");
-            ListarDatos("http://localhost:5287/ApiVPC/Journey");
+            ListarDatos("http://localhost:5287/ApiVPC/Journey", "Journey List");
             break;
 
           default:
