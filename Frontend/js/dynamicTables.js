@@ -74,9 +74,23 @@ const CreateTableList = (data, tableInfo, mainContainer) => {
 
     let tableRow = document.createElement("tr");
     Object.keys(data).forEach((key) => {
-      let tBodyTd = document.createElement("td");
-      tBodyTd.innerHTML = `${data[key]}`.trim();
-      tableRow.appendChild(tBodyTd);
+      if (Array.isArray(data[key])) {
+        let tBodyTd = document.createElement("td");
+        let flighInfo = "";
+        data[key].forEach((fli, index) => {
+          Object.keys(fli).forEach((subkey) => {
+            flighInfo += `<b>${subkey.toUpperCase()}</b> : ${fli[subkey]}</br>`;
+          });
+          flighInfo += `</br>`;
+        });
+        flighInfo = flighInfo.slice(0, -5);
+        tBodyTd.innerHTML = flighInfo.trim();
+        tableRow.appendChild(tBodyTd);
+      } else {
+        let tBodyTd = document.createElement("td");
+        tBodyTd.innerHTML = `${data[key]}`.trim();
+        tableRow.appendChild(tBodyTd);
+      }
     });
     tableBody.appendChild(tableRow);
   }
