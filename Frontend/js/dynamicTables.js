@@ -32,38 +32,55 @@ const CreateTableList = (data, tableInfo, mainContainer) => {
   let theaderRow = document.createElement("tr");
   theaderRow.classList.add("text-info");
 
-  Object.keys(data[0]).forEach((key) => {
-    let tableTh = document.createElement("th");
-    tableTh.classList.add("text-info");
-    tableTh.textContent = key.toUpperCase();
-    theaderRow.appendChild(tableTh);
-  });
+  if (data[0]) {
+    Object.keys(data[0]).forEach((key) => {
+      let tableTh = document.createElement("th");
+      tableTh.classList.add("text-info");
+      tableTh.textContent = key.toUpperCase();
+      theaderRow.appendChild(tableTh);
+    });
+    data.forEach((elemArray) => {
+      let tableRow = document.createElement("tr");
 
-  tableHeader.appendChild(theaderRow);
+      Object.keys(elemArray).forEach((key) => {
+        let tBodyTd = document.createElement("td");
 
-  data.forEach((elemArray) => {
-    let tableRow = document.createElement("tr");
-
-    Object.keys(elemArray).forEach((key) => {
-      let tBodyTd = document.createElement("td");
-
-      if (Array.isArray(elemArray[key])) {
-        let flighInfo = "";
-        elemArray[key].forEach((fli, index) => {
-          Object.keys(fli).forEach((subkey) => {
-            flighInfo += `<b>${subkey.toUpperCase()}</b> : ${fli[subkey]}</br>`;
+        if (Array.isArray(elemArray[key])) {
+          let flighInfo = "";
+          elemArray[key].forEach((fli, index) => {
+            Object.keys(fli).forEach((subkey) => {
+              flighInfo += `<b>${subkey.toUpperCase()}</b> : ${
+                fli[subkey]
+              }</br>`;
+            });
+            flighInfo += `</br>`;
           });
-          flighInfo += `</br>`;
-        });
-        flighInfo = flighInfo.slice(0, -5);
-        tBodyTd.innerHTML = flighInfo.trim();
-      } else {
-        tBodyTd.innerHTML = `${elemArray[key]}`.trim();
-      }
+          flighInfo = flighInfo.slice(0, -5);
+          tBodyTd.innerHTML = flighInfo.trim();
+        } else {
+          tBodyTd.innerHTML = `${elemArray[key]}`.trim();
+        }
+        tableRow.appendChild(tBodyTd);
+      });
+      tableBody.appendChild(tableRow);
+    });
+  } else {
+    Object.keys(data).forEach((key) => {
+      let tableTh = document.createElement("th");
+      tableTh.classList.add("text-info");
+      tableTh.textContent = key.toUpperCase();
+      theaderRow.appendChild(tableTh);
+    });
+
+    let tableRow = document.createElement("tr");
+    Object.keys(data).forEach((key) => {
+      let tBodyTd = document.createElement("td");
+      tBodyTd.innerHTML = `${data[key]}`.trim();
       tableRow.appendChild(tBodyTd);
     });
     tableBody.appendChild(tableRow);
-  });
+  }
+  tableHeader.appendChild(theaderRow);
 
   table.appendChild(tableCaption);
   table.appendChild(tableHeader);
