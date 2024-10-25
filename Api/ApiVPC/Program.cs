@@ -2,6 +2,7 @@ using Persistence.data;
 using Microsoft.EntityFrameworkCore;
 using ApiVPC.Extensions;
 using System.Reflection;
+using AspNetCoreRateLimit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,8 @@ builder.Services.AddSwaggerGen();
 // Habilitando al connfiguracion para las politicas Cors
 builder.Services.ConfigureCors();
 
+/* Habilitando configuraciones para el RateLimiting */
+builder.Services.ConfigureRateLimiting();
 
 // Agregando AutoMapper al proyecto y configurando para que busque las clases(Perfiles de mapeo) que hereden de Profile 
 builder.Services.AddAutoMapper(Assembly.GetEntryAssembly());
@@ -41,6 +44,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+
+app.UseIpRateLimiting();
 
 // Necesario para que se reconozcan lso controlaldores que se crearon 
 app.MapControllers();
