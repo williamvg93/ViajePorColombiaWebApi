@@ -49,11 +49,5 @@ namespace ApiVPC.Services
             return flight;
         }
 
-        public async void DeleteFlight(Flight flight)
-        {
-            _unitOfWork.Flights.Remove(flight);
-            await _unitOfWork.SaveAsync();
-        }
-
     }
 }

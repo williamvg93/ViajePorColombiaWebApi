@@ -45,7 +45,7 @@ namespace ApiVPC.Controller
         public async Task<ActionResult<JourneyDto>> Get(int id)
         {
             var journey = await _unitOfWork.Journeys.GetJourneyFlightTrasnportById(id);
-            if (journey == null) return NotFound($"No se encontraorn Viajes con el ID : ({id})");
+            if (journey == null) return NotFound(new {error = $"No se encontraron Viajes con el ID : ({id})" });
             return _mapper.Map<JourneyDto>(journey);
         }
     
@@ -56,12 +56,16 @@ namespace ApiVPC.Controller
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> Post(JourneyDTOPost journeyDTOPost)
         {
+            if (string.IsNullOrWhiteSpace(journeyDTOPost.Origin) || string.IsNullOrWhiteSpace(journeyDTOPost.Destination))
+            {
+                return BadRequest(new { error = "Los campos 'Origin' y 'Destination' son obligatorios, no pueden estar vacios !!!." });
+            }
 
             // Buscar vuelos directos o con escalas
             var flights = await _journeyService.SearchFlightsWithStopovers(journeyDTOPost.Origin, journeyDTOPost.Destination);
 
             if (flights == null || flights.Count == 0)
-                return BadRequest("No se encontraron vuelos que conecten el origen con el destino.");
+                return BadRequest( new {Error  = "No se encontraron vuelos que conecten el origen con el destino." });
 
             // Calcular el precio total del viaje
             double totalPrice = flights.Sum(v => v.Price);
@@ -88,10 +92,15 @@ namespace ApiVPC.Controller
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<JourneyDto>> Put(int id, [FromBody] JourneyDto journeyDto)
         {
+            if (string.IsNullOrWhiteSpace(journeyDto.Origin) || string.IsNullOrWhiteSpace(journeyDto.Destination))
+            {
+                return BadRequest(new { error = "Los campos 'Origin' y 'Destination' son obligatorios, no pueden estar vacios !!!." });
+            }
+
             var journey = _mapper.Map<Journey>(journeyDto);
             if (journey.Id == 0) journey.Id = id; 
-            if (journey.Id != id) return BadRequest("Error en la Peticion, algo ocurrio con el ID ingresado");
-            if (journey == null) return NotFound($"No Existe un Viaje con el ID : ({id})");
+            if (journey.Id != id) return BadRequest(new {error = "Error en la Peticion, algo ocurrio con el ID ingresado" });
+            if (journey == null) return NotFound( new {error = $"No Existe un Viaje con el ID : ({id})"});
     
             journeyDto.Id = journey.Id;
             _unitOfWork.Journeys.Update(journey);
@@ -106,10 +115,10 @@ namespace ApiVPC.Controller
         public async Task<ActionResult> Delete(int id)
         {
             var journey = await _unitOfWork.Journeys.GetByIdAsync(id);
-            if (journey == null) return NotFound();
+            if (journey == null) return NotFound(new { error = $"no se encontraron Viajes con el número de Id({id}) Ingresado" });
             _unitOfWork.Journeys.Remove(journey);
             await _unitOfWork.SaveAsync();
-            return Ok("Viaje eliminado correctamente");
+            return Ok(new { success = "Viaje borrado Exitosamente !!" });
         }
     }
 }

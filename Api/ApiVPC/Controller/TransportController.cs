@@ -40,7 +40,7 @@ namespace ApiVPC.Controller
         public async Task<ActionResult<TransportDto>> Get(int id)
         {
             var trasnport = await _unitOfWork.Transports.GetByIdAsync(id);
-            if (trasnport == null) return NotFound();
+            if (trasnport == null) return NotFound(new { error = $"no se encontraron trasnportes con el número de Id({id}) Ingresado" });
             /* return Ok(trasnport); */
             return _mapper.Map<TransportDto>(trasnport);
         }
@@ -52,13 +52,19 @@ namespace ApiVPC.Controller
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Transport>> Post(TransportDto transportDto)
         {
+            if (string.IsNullOrWhiteSpace(transportDto.FlightCarries) || string.IsNullOrWhiteSpace(transportDto.FlightNumber))
+            {
+                return Ok(new { error = "Los campos 'flightCarries' y 'flightNumber' son obligatorios, no pueden estar vacios !!!." });
+            }
+
             var transport = _mapper.Map<Transport>(transportDto);
 
             this._unitOfWork.Transports.Add(transport);
             await _unitOfWork.SaveAsync();
 
-            if (transport == null) return BadRequest();
-        
+            if (transport == null) return BadRequest(new
+            { error = "Error inesperado al momento de crear el registro !!!" });
+
             transportDto.Id = transport.Id;
             return CreatedAtAction(nameof(Post), new { id = transportDto.Id }, transportDto);
         }
@@ -71,13 +77,18 @@ namespace ApiVPC.Controller
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<TransportDto>> Put(int id, [FromBody] TransportDto transportDto)
         {
+            if (string.IsNullOrWhiteSpace(transportDto.FlightCarries) || string.IsNullOrWhiteSpace(transportDto.FlightNumber))
+            {
+                return Ok(new { error = "Los campos 'flightCarries' y 'flightNumber' son obligatorios, no pueden estar vacios !!!." });
+            }
+
             var transport = _mapper.Map<Transport>(transportDto);
 
             if (transport.Id == 0) transport.Id = id;
 
-            if (transport.Id != id) return BadRequest();
+            if (transport.Id != id) return BadRequest( new {error = $"Error con el número de ID({id}) ingresado"});
             
-            if (transport == null) return NotFound();
+            if (transport == null) return NotFound(new { error = $"no se encontraron trasnportes con el número de Id({id}) Ingresado" });
 
             transportDto.Id = transport.Id;
             _unitOfWork.Transports.Update(transport);
@@ -94,11 +105,11 @@ namespace ApiVPC.Controller
         {
             var transport = await _unitOfWork.Transports.GetByIdAsync(id);
 
-            if (transport == null) return NotFound();
+            if (transport == null) return NotFound(new { error = $"no se encontraron trasnportes con el núumero de Id({id}) Ingresado" });
 
             _unitOfWork.Transports.Remove(transport);
             await _unitOfWork.SaveAsync();
-            return Ok("Transport was Deleted");
+            return Ok(new {success = "Transport was Deleted" });
         }
 
 
