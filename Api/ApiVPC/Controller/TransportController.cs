@@ -54,7 +54,7 @@ namespace ApiVPC.Controller
         {
             if (string.IsNullOrWhiteSpace(transportDto.FlightCarries) || string.IsNullOrWhiteSpace(transportDto.FlightNumber))
             {
-                return Ok(new { error = "Los campos 'flightCarries' y 'flightNumber' son obligatorios, no pueden estar vacios !!!." });
+                return BadRequest(new { error = "Los campos 'flightCarries' y 'flightNumber' son obligatorios, no pueden estar vacios !!!." });
             }
 
             var transport = _mapper.Map<Transport>(transportDto);

@@ -1,5 +1,5 @@
 
-const CreateTableList = (data, tableInfo, mainContainer) => {
+const CreateDataListTable = (data, tableInfo, mainContainer) => {
   mainContainer.innerHTML = "";
   let table = document.createElement("table");
   table.classList.add(
@@ -55,8 +55,7 @@ const CreateTableList = (data, tableInfo, mainContainer) => {
             });
             flighInfo += `</br>`;
           });
-          flighInfo = flighInfo.slice(0, -5);
-          tBodyTd.innerHTML = flighInfo.trim();
+          tBodyTd.innerHTML = (flighInfo.slice(0, -5)).trim();
         } else {
           tBodyTd.innerHTML = `${elemArray[key]}`.trim();
         }
@@ -83,8 +82,7 @@ const CreateTableList = (data, tableInfo, mainContainer) => {
           });
           flighInfo += `</br>`;
         });
-        flighInfo = flighInfo.slice(0, -5);
-        tBodyTd.innerHTML = flighInfo.trim();
+        tBodyTd.innerHTML = (flighInfo.slice(0, -5)).trim();
         tableRow.appendChild(tBodyTd);
       } else {
         let tBodyTd = document.createElement("td");
@@ -104,4 +102,4 @@ const CreateTableList = (data, tableInfo, mainContainer) => {
 };
 
 
-export {CreateTableList};
+export {CreateDataListTable};

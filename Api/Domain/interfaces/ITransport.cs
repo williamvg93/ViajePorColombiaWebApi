@@ -8,5 +8,6 @@ namespace Domain.interfaces
 {
     public interface ITransport : IGenericRepository<Transport>
     {
+        
     }
 }

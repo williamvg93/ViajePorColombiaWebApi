@@ -1,9 +1,15 @@
 
-const GetDataList = async (url) => {
-  console.log("obteniendo Data");
-  let dataJson = await (await fetch(url)).json();
-  return await dataJson;
+
+const SendReguest = async (url, method, dataForm) => {
+  const confgFetch = {
+    method: method,
+    headers: { "content-Type": "application/json" },
+  };
+
+  method == "post" && (confgFetch.body = dataForm);
+
+  let peticion = await (await fetch(url, confgFetch)).json();
+  return await peticion;
 };
 
-
-export {GetDataList};
+export {SendReguest};

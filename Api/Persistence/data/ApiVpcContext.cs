@@ -24,6 +24,8 @@ namespace Persistence.data
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+            
         }
 
     }

@@ -1,6 +1,6 @@
-import { CreateTableList } from "./dynamicTables.js";
-import { CreateForms } from "./dynamicForms.js";
-import { GetDataList } from "./crud.js";
+import { CreateDataListTable } from "./dynamicTables.js";
+import { CreateFormElements, CreateFormCont } from "./dynamicForms.js";
+import { SendReguest } from "./crud.js";
 import { CreateMsgAlert } from "./msgAlert.js";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -10,53 +10,28 @@ document.addEventListener("DOMContentLoaded", () => {
   const mainPageTitle = document.querySelector("#mainTitle");
 
 
-  const ObtenerDataList = (url, tableInfo) => {
-    GetDataList(url)
+  const ObtenerDataList = (url, method, tableInfo) => {
+    SendReguest(url, method, "")
       .then((data) => {
-        let table = CreateTableList(data, tableInfo, mainContainer);
+        let table = CreateDataListTable(data, tableInfo, mainContainer);
         let tableContainer = document.createElement("div");
         tableContainer.classList.add("col");
-        mainPageTitle.textContent = tableInfo;
         tableContainer.appendChild(table);
-        mainContainer.appendChild(tableContainer)
+        mainPageTitle.textContent = tableInfo;
+        mainContainer.appendChild(tableContainer);
       })
       .catch((error) => {
         console.error("Error en la consulta: ", error);
       });
   };
 
-
-  const DataSend = async (url, method, dataForm) => {
-    const confgFetch = {
-      method: method,
-      headers: { "content-Type": "application/json" },
-      body: dataForm 
-    };
-
-    let peticion = await (await fetch(url, confgFetch)).json();
-    return await peticion;
-  }
-
-
   const prepararFormData = (url, formInfo, tbInfo, dataEle, dataBtn) => {
     mainContainer.innerHTML = "";
-    let cardContainer = document.createElement("div");
-    cardContainer.classList.add("card", "text-bg-dark", "col-md-5", "mt-4");
-
-    let cardHeader = document.createElement("div")
-    cardHeader.classList.add("card-header", "fs-1", "text-center");
-    cardHeader.textContent = formInfo;
-
-    let cardBody = document.createElement("div")
-    cardBody.classList.add("card-body", "d-flex", "justify-content-center");
-    
-    let form = CreateForms(dataEle, "post", dataBtn);
     mainPageTitle.textContent = "";
 
-    cardContainer.appendChild(cardHeader);
-    cardBody.appendChild(form);
-    cardContainer.appendChild(cardBody);
-    mainContainer.appendChild(cardContainer);
+    let formElements = CreateFormElements(dataEle, "post", dataBtn);
+    let form = CreateFormCont(formElements, formInfo);
+    mainContainer.appendChild(form);
 
     let btnAdd = document.querySelector("#btnAdd"); 
     btnAdd.addEventListener("click", (e) => {
@@ -67,8 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
       let dataForm = {};
 
       dataF.forEach((val,key) => {
-        console.log(val);
-        console.log(key);
         if ((key == "price" || key == "trasportId") && val == "") {
           val = 0;
         }
@@ -76,9 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       console.log(dataForm);
 
-      DataSend(url, "post", JSON.stringify(dataForm))
+      SendReguest(url, "post", JSON.stringify(dataForm))
         .then((data) => {
-          let msgErrors = "";
+          let msgErrors;
           console.log(data);
           if (data.errors || data.error) {
             let msgAlert;
@@ -98,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
             mainContainer.prepend(msgAlert);
           }
           if (data.id) {
-            let table = CreateTableList(data, tbInfo, mainContainer);
+            let table = CreateDataListTable(data, tbInfo, mainContainer);
             let tableContainer = document.createElement("div");
             tableContainer.classList.add("col");
             mainPageTitle.textContent = tbInfo;
@@ -115,20 +88,19 @@ document.addEventListener("DOMContentLoaded", () => {
   btnsForm.forEach((btn) => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
-      let dataForm = ""
-      let dataBtn = ""
+      let dataForm, dataBtn;
       console.log(e.target.getAttribute("id"));
 
       switch (e.target.getAttribute("id")) {
         case "viajesList":
-          ObtenerDataList("http://localhost:5287/ApiVPC/Journey", "Journey List");
+          ObtenerDataList("http://localhost:5287/ApiVPC/Journey", "get", "Journey List");
           break;
         case "vuelosList":
-          ObtenerDataList("http://localhost:5287/ApiVPC/Flight", "Flight List");
+          ObtenerDataList("http://localhost:5287/ApiVPC/Flight", "get", "Flight List");
           break;
         case "transporteList":
           ObtenerDataList(
-            "http://localhost:5287/ApiVPC/Transport",
+            "http://localhost:5287/ApiVPC/Transport", "get",
             "Transport List"
           );
           break;
