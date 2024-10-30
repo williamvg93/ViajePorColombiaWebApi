@@ -1,4 +1,4 @@
-import { CreateDataListTable } from "./dynamicTables.js";
+import { CreateDataListTable, TableToContainer } from "./dynamicTables.js";
 import { CreateFormElements, CreateFormCont } from "./dynamicForms.js";
 import { SendReguest } from "./crud.js";
 import { CreateMsgAlert } from "./msgAlert.js";
@@ -10,15 +10,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const mainPageTitle = document.querySelector("#mainTitle");
 
 
-  const ObtenerDataList = (url, method, tableInfo) => {
+  const ObtenerDataList = (url, method, tableInfo, btnNa, msg) => {
+
     SendReguest(url, method, "")
       .then((data) => {
-        let table = CreateDataListTable(data, tableInfo, mainContainer);
-        let tableContainer = document.createElement("div");
-        tableContainer.classList.add("col");
-        tableContainer.appendChild(table);
+        let table = CreateDataListTable(data, tableInfo, mainContainer, btnNa);
         mainPageTitle.textContent = tableInfo;
-        mainContainer.appendChild(tableContainer);
+        mainContainer.appendChild(TableToContainer(table));
+
+        if (msg !== null && typeof msg === "object") {
+          mainContainer.prepend(CreateMsgAlert(msg.success));
+        }
+
+        let btnDelete = document.querySelectorAll("#deleteBtn");
+        btnDelete.forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            let urlEnti = e.target.getAttribute("name");
+            let urlId = e.target.getAttribute("value");
+            let urlReq = `http://localhost:5287/ApiVPC/${urlEnti}/${urlId}`;
+            SendReguest(urlReq, "delete", "").then(
+              (data) => {
+                console.log(data);
+                ObtenerDataList(url, method, tableInfo, btnNa, data);
+              }
+            );
+            console.log(urlReq);
+          });
+        });
       })
       .catch((error) => {
         console.error("Error en la consulta: ", error);
@@ -51,36 +70,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
       SendReguest(url, "post", JSON.stringify(dataForm))
         .then((data) => {
-          let msgErrors;
-          console.log(data);
-          if (data.errors || data.error) {
-            let msgAlert;
-            if (data.errors) {
-              msgErrors += `<strong>${data.title}</strong>: `;
-              Object.keys(data.errors).forEach((key) => {
-                let msgError = data.errors[key];
-                msgError.forEach((msg) => {
-                  msgErrors += `${msg}\n`;
-                });
-              });
-              msgAlert = CreateMsgAlert(msgErrors);
-            }
-            if (data.error) {
-              msgAlert = CreateMsgAlert(data.error);
-            }
-            mainContainer.prepend(msgAlert);
-          }
           if (data.id) {
-            let table = CreateDataListTable(data, tbInfo, mainContainer);
+            let table = CreateDataListTable(
+              data,
+              tbInfo,
+              mainContainer
+            );
             let tableContainer = document.createElement("div");
             tableContainer.classList.add("col");
             mainPageTitle.textContent = tbInfo;
             tableContainer.appendChild(table);
             mainContainer.appendChild(tableContainer);
-          }
+          } else {
+            let msgErrors, msgAlert;
+            console.log(data);
+            if (data.errors || data.error) {
+              if (data.errors) {
+                msgErrors += `<strong>${data.title}</strong>: `;
+                Object.keys(data.errors).forEach((key) => {
+                  let msgError = data.errors[key];
+                  msgError.forEach((msg) => {
+                    msgErrors += `${msg}\n`;
+                  });
+                });
+                msgAlert = CreateMsgAlert(msgErrors);
+              }
+              if (data.error) {
+                msgAlert = CreateMsgAlert(data.error);
+              }
+            } else {
+              msgAlert = CreateMsgAlert(data);
+            }
+            mainContainer.prepend(msgAlert);
+          }   
         })
         .catch(error => {
           console.error(error);
+          let msgAlert = CreateMsgAlert(error);
+          mainContainer.prepend(msgAlert);
+          
         });
     });
   }
@@ -89,19 +117,32 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
       let dataForm, dataBtn;
-      console.log(e.target.getAttribute("id"));
-
       switch (e.target.getAttribute("id")) {
         case "viajesList":
-          ObtenerDataList("http://localhost:5287/ApiVPC/Journey", "get", "Journey List");
+          ObtenerDataList(
+            "http://localhost:5287/ApiVPC/Journey",
+            "get",
+            "Journey List",
+            "Journey",
+            null
+          );
           break;
         case "vuelosList":
-          ObtenerDataList("http://localhost:5287/ApiVPC/Flight", "get", "Flight List");
+          ObtenerDataList(
+            "http://localhost:5287/ApiVPC/Flight",
+            "get",
+            "Flight List",
+            "Flight",
+            null
+          );
           break;
         case "transporteList":
           ObtenerDataList(
-            "http://localhost:5287/ApiVPC/Transport", "get",
-            "Transport List"
+            "http://localhost:5287/ApiVPC/Transport",
+            "get",
+            "Transport List",
+            "Transport",
+            null
           );
           break;
         case "viajesform":

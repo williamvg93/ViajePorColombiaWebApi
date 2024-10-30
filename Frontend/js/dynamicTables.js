@@ -1,5 +1,113 @@
 
-const CreateDataListTable = (data, tableInfo, mainContainer) => {
+const TableToContainer = (table) => {
+  let tableContainer = document.createElement("div");
+  tableContainer.classList.add("col");
+  tableContainer.appendChild(table);
+  return tableContainer;
+}
+
+
+const CreateContentTHead = (textColor, tableData) => {
+  let theaderRow = document.createElement("tr");
+  theaderRow.classList.add(textColor);
+  if (tableData[0] !== null && typeof tableData[0] === "object"){
+    Object.keys(tableData[0]).forEach((key) => {
+      let tableTh = document.createElement("th");
+      tableTh.classList.add(textColor);
+      tableTh.textContent = key.toUpperCase();
+      theaderRow.appendChild(tableTh);
+    });
+  } else {
+    Object.keys(tableData).forEach((key) => {
+      let tableTh = document.createElement("th");
+      tableTh.classList.add(textColor);
+      tableTh.textContent = key.toUpperCase();
+      theaderRow.appendChild(tableTh);
+    });  
+  }
+  let tableTh = document.createElement("th");
+  tableTh.classList.add(textColor);
+  tableTh.textContent = "Actions";
+  theaderRow.appendChild(tableTh);
+  return theaderRow;
+}
+
+const CreateContentTBody = (tbody, tableData, btnNa) => {
+  let idEle;
+  if (tableData[0] !== null && typeof tableData[0] === "object") {
+    tableData.forEach((elemArray) => {
+      idEle = "";
+      let tableRow = document.createElement("tr");
+      Object.keys(elemArray).forEach((key) => {
+        if (key === "id") {
+          idEle = elemArray[key];
+        }
+        let tBodyTd = document.createElement("td");
+        if (Array.isArray(elemArray[key])) {
+          let flighInfo = "";
+          elemArray[key].forEach((fli, index) => {
+            Object.keys(fli).forEach((subkey) => {
+              flighInfo += `<b>${subkey.toUpperCase()}</b> : ${
+                fli[subkey]
+              }</br>`;
+            });
+            flighInfo += `</br>`;
+          });
+          tBodyTd.innerHTML = flighInfo.slice(0, -5).trim();
+        } else {
+          if (key === "id") {
+            idEle = elemArray[key];
+          }
+          tBodyTd.innerHTML = `${elemArray[key]}`.trim();
+        }
+        tableRow.appendChild(tBodyTd);
+      });
+      let tBodyTdAct = document.createElement("td");
+
+      tBodyTdAct.innerHTML = /* html */ `
+        <button type="button" id="editBtn" name="${btnNa}" value="${idEle}" class="btn btn-success btn-sm">Edit</button>
+        <button type="button" id="deleteBtn" name="${btnNa}" value="${idEle}" class="btn btn-danger btn-sm">Delete</button>
+      `;
+      tableRow.appendChild(tBodyTdAct);
+      tbody.appendChild(tableRow);
+    });
+  } else {
+    let tableRow = document.createElement("tr");
+    Object.keys(tableData).forEach((key) => {
+      let tBodyTd = document.createElement("td");
+      if (Array.isArray(tableData[key])) {
+        let flighInfo = "";
+        tableData[key].forEach((fli, index) => {
+          Object.keys(fli).forEach((subkey) => {
+            if (subkey === "id") {
+              idEle = fli[subkey];
+            }
+            flighInfo += `<b>${subkey.toUpperCase()}</b> : ${fli[subkey]}</br>`;
+          });
+          flighInfo += `</br>`;
+        });
+        tBodyTd.innerHTML = flighInfo.slice(0, -5).trim();
+      } else {
+        if (key === "id") {
+          idEle = tableData[key];
+        }
+        let tBodyTd = document.createElement("td");
+        tBodyTd.innerHTML = `${tableData[key]}`.trim();
+      }
+      tableRow.appendChild(tBodyTd);
+    });
+    let tBodyTdAct = document.createElement("td");
+    tBodyTdAct.innerHTML = /* html */ `
+      <button type="button" id="editBtn" name="${btnNa}" value="${idEle}" class="btn btn-success btn-sm" >Edit</button>
+      <button type="button" id="deleteBtn" name="${btnNa}" value="${idEle}" class="btn btn-danger btn-sm">Delete</button>
+    `;
+    tableRow.appendChild(tBodyTdAct);
+    tbody.appendChild(tableRow);
+  }
+  return tbody;
+};
+
+const CreateDataListTable = (data, tableInfo, mainContainer, btnNa) => {
   mainContainer.innerHTML = "";
   let table = document.createElement("table");
   table.classList.add(
@@ -17,6 +125,7 @@ const CreateDataListTable = (data, tableInfo, mainContainer) => {
   let tableCaption = document.createElement("caption");
   tableCaption.textContent = tableInfo;
   tableCaption.classList.add("fs-5");
+  table.appendChild(tableCaption);
 
   let tableHeader = document.createElement("thead");
   tableHeader.classList.add(
@@ -26,80 +135,16 @@ const CreateDataListTable = (data, tableInfo, mainContainer) => {
     "border-white",
     "text-info"
   );
+  let theaderRow = CreateContentTHead("text-info", data);
+  tableHeader.appendChild(theaderRow);
+  table.appendChild(tableHeader);
 
   let tableBody = document.createElement("tbody");
-
-  let theaderRow = document.createElement("tr");
-  theaderRow.classList.add("text-info");
-
-  if (data[0]) {
-    Object.keys(data[0]).forEach((key) => {
-      let tableTh = document.createElement("th");
-      tableTh.classList.add("text-info");
-      tableTh.textContent = key.toUpperCase();
-      theaderRow.appendChild(tableTh);
-    });
-    data.forEach((elemArray) => {
-      let tableRow = document.createElement("tr");
-
-      Object.keys(elemArray).forEach((key) => {
-        let tBodyTd = document.createElement("td");
-
-        if (Array.isArray(elemArray[key])) {
-          let flighInfo = "";
-          elemArray[key].forEach((fli, index) => {
-            Object.keys(fli).forEach((subkey) => {
-              flighInfo += `<b>${subkey.toUpperCase()}</b> : ${
-                fli[subkey]
-              }</br>`;
-            });
-            flighInfo += `</br>`;
-          });
-          tBodyTd.innerHTML = (flighInfo.slice(0, -5)).trim();
-        } else {
-          tBodyTd.innerHTML = `${elemArray[key]}`.trim();
-        }
-        tableRow.appendChild(tBodyTd);
-      });
-      tableBody.appendChild(tableRow);
-    });
-  } else {
-    Object.keys(data).forEach((key) => {
-      let tableTh = document.createElement("th");
-      tableTh.classList.add("text-info");
-      tableTh.textContent = key.toUpperCase();
-      theaderRow.appendChild(tableTh);
-    });
-
-    let tableRow = document.createElement("tr");
-    Object.keys(data).forEach((key) => {
-      if (Array.isArray(data[key])) {
-        let tBodyTd = document.createElement("td");
-        let flighInfo = "";
-        data[key].forEach((fli, index) => {
-          Object.keys(fli).forEach((subkey) => {
-            flighInfo += `<b>${subkey.toUpperCase()}</b> : ${fli[subkey]}</br>`;
-          });
-          flighInfo += `</br>`;
-        });
-        tBodyTd.innerHTML = (flighInfo.slice(0, -5)).trim();
-        tableRow.appendChild(tBodyTd);
-      } else {
-        let tBodyTd = document.createElement("td");
-        tBodyTd.innerHTML = `${data[key]}`.trim();
-        tableRow.appendChild(tBodyTd);
-      }
-    });
-    tableBody.appendChild(tableRow);
-  }
-  tableHeader.appendChild(theaderRow);
-
-  table.appendChild(tableCaption);
-  table.appendChild(tableHeader);
-  table.appendChild(tableBody);
+  table.appendChild(CreateContentTBody(tableBody, data, btnNa));
 
   return table;
 };
 
 
-export {CreateDataListTable};
+
+export { CreateDataListTable, TableToContainer };

@@ -21,7 +21,7 @@ const CreateFormCont = (formEle, formInfo) => {
   cardBody.classList.add("card-body", "d-flex", "justify-content-center");
 
   cardContainer.appendChild(cardHeader);
-  cardBody.appendChild(formElements);
+  cardBody.appendChild(formEle);
   cardContainer.appendChild(cardBody);
   return cardContainer;
 };
