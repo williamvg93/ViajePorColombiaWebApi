@@ -100,7 +100,7 @@ namespace ApiVPC.Controller
             if (flight == null) return NotFound( new { error = $"There are no data with the ID({id}) entered" } );
             _unitOfWork.Flights.Remove(flight);
             await _unitOfWork.SaveAsync();
-            return Ok( new {success= "Flight was Deleted" });
+            return Ok( new {success= $"The Flight id:{flight.Id} from '{flight.Origin} to {flight.Destination}' was successfully deleted !!" });
         }
     }
 }

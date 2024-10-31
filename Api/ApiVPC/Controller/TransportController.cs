@@ -10,16 +10,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ApiVPC.Controller
 {
-    public class TransportController : BaseController
+    public class TransportController(IUnitOfWork unitOfWork, IMapper mapper) : BaseController
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
-    
-        public TransportController(IUnitOfWork unitOfWork, IMapper mapper)
-        {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
-        }
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IMapper _mapper = mapper;
 
         /* Get all Data from Table */
         [HttpGet]
@@ -109,7 +103,7 @@ namespace ApiVPC.Controller
 
             _unitOfWork.Transports.Remove(transport);
             await _unitOfWork.SaveAsync();
-            return Ok(new {success = "Transport was Deleted" });
+            return Ok(new {success = $"The '{transport.FlightCarries}' Transport was Deleted" });
         }
 
 

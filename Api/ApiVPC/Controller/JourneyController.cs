@@ -118,7 +118,7 @@ namespace ApiVPC.Controller
             if (journey == null) return NotFound(new { error = $"no se encontraron Viajes con el número de Id({id}) Ingresado" });
             _unitOfWork.Journeys.Remove(journey);
             await _unitOfWork.SaveAsync();
-            return Ok(new { success = "Viaje borrado Exitosamente !!" });
+            return Ok(new { success = $"The Journey id:{journey.Id} from '{journey.Origin} to {journey.Destination}' was successfully deleted !!"});
         }
     }
 }
