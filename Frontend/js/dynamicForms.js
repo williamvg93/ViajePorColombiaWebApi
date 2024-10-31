@@ -26,8 +26,47 @@ const CreateFormCont = (formEle, formInfo) => {
   return cardContainer;
 };
 
+const CreateFormElements = (elem, data) => {
+  let divFormGroup = document.createElement("div");
+  divFormGroup.classList.add("mb-3", "w-100");
 
-const CreateFormElements = (listaElementos, method, btn) => {
+  let label = document.createElement("label");
+  label.textContent = elem.toUpperCase();
+  label.setAttribute("for", elem);
+  label.classList.add("form-label");
+
+  let input = document.createElement("input");
+  input.setAttribute("type", "text");
+  input.setAttribute("id", elem);
+  input.setAttribute("name", elem);
+  input.setAttribute("value", data);
+  input.classList.add("form-control");
+
+  divFormGroup.appendChild(label);
+  divFormGroup.appendChild(input);
+
+  return divFormGroup;
+};
+
+const CreateFormBtn = (btnAtt) => {
+  let btnForm = document.createElement("button");
+  btnForm.classList.add(
+    "btn",
+    "btn-primary",
+    "w-75",
+    "mt-4",
+    "mb-3",
+    "p-3",
+    "fs-5"
+  );
+  btnForm.setAttribute("id", btnAtt[0]);
+  btnForm.setAttribute("type", "submit");
+  btnForm.textContent = btnAtt[1];
+  return btnForm;
+};
+
+
+const FormElements = (listaElementos, method, btn) => {
   let form = document.createElement("form");
   form.setAttribute("methohd", method);
   form.setAttribute("id", "formAdd");
@@ -39,47 +78,31 @@ const CreateFormElements = (listaElementos, method, btn) => {
     "align-items-center"
   );
 
-  listaElementos.forEach((element) => {
-    if (inputOptions.includes(element)) {
-      let divFormGroup = document.createElement("div");
-      divFormGroup.classList.add("mb-3", "w-100");
+  console.log(listaElementos);
+  console.log(typeof listaElementos);
+  console.log(Array.isArray(listaElementos));
 
-      let label = document.createElement("label");
-      label.textContent = element.toUpperCase();
-      label.setAttribute("for", element);
-      label.classList.add("form-label");
+  if (Array.isArray(listaElementos)) {
+    listaElementos.forEach((element) => {
+      if (inputOptions.includes(element)) {
+        form.appendChild(CreateFormElements(element, ""));
+      }
+    });
+  } else if (listaElementos !== null && typeof listaElementos === "object") {
+    Object.keys(listaElementos).forEach(key => {
+      console.log(`key: ${key} -- val: ${listaElementos[key]}`);
+      if (inputOptions.includes(key)) {
+        form.appendChild(CreateFormElements(key, listaElementos[key]));
+      }
+    });
+  } else {
+    console.log("error recibiendo datos del formulario");
+  }
 
-      let input = document.createElement("input");
-      input.setAttribute("type", "text");
-      input.setAttribute("id", element);
-      input.setAttribute("name", element);
-      input.classList.add("form-control");
-
-      divFormGroup.appendChild(label);
-      divFormGroup.appendChild(input);
-
-      form.appendChild(divFormGroup);
-    }
-  });
-
-  let btnForm = document.createElement("button");
-  btnForm.classList.add(
-    "btn",
-    "btn-primary",
-    "w-75",
-    "mt-4",
-    "mb-3",
-    "p-3",
-    "fs-5"
-  );
-  btnForm.setAttribute("id", btn[0]);
-  btnForm.setAttribute("type", "submit");
-  btnForm.textContent = btn[1];
-
-  form.appendChild(btnForm);
+  form.appendChild(CreateFormBtn(btn));
 
   return form;
 };
 
 
-export { CreateFormCont, CreateFormElements };
+export { CreateFormCont, FormElements };

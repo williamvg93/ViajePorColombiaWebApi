@@ -32,7 +32,7 @@ const CreateContentTHead = (textColor, tableData) => {
   return theaderRow;
 }
 
-const CreateContentTBody = (tbody, tableData, btnNa) => {
+const CreateContentTBody = (tbody, tableData, btnName) => {
   let idEle;
   if (tableData[0] !== null && typeof tableData[0] === "object") {
     tableData.forEach((elemArray) => {
@@ -65,8 +65,8 @@ const CreateContentTBody = (tbody, tableData, btnNa) => {
       let tBodyTdAct = document.createElement("td");
 
       tBodyTdAct.innerHTML = /* html */ `
-        <button type="button" id="editBtn" name="${btnNa}" value="${idEle}" class="btn btn-success btn-sm">Edit</button>
-        <button type="button" id="deleteBtn" name="${btnNa}" value="${idEle}" class="btn btn-danger btn-sm">Delete</button>
+        <button type="button" id="editBtn" name="${btnName}" value="${idEle}" class="btn btn-success btn-sm">Edit</button>
+        <button type="button" id="deleteBtn" name="${btnName}" value="${idEle}" class="btn btn-danger btn-sm">Delete</button>
       `;
       tableRow.appendChild(tBodyTdAct);
       tbody.appendChild(tableRow);
@@ -91,15 +91,14 @@ const CreateContentTBody = (tbody, tableData, btnNa) => {
         if (key === "id") {
           idEle = tableData[key];
         }
-        let tBodyTd = document.createElement("td");
         tBodyTd.innerHTML = `${tableData[key]}`.trim();
       }
       tableRow.appendChild(tBodyTd);
     });
     let tBodyTdAct = document.createElement("td");
     tBodyTdAct.innerHTML = /* html */ `
-      <button type="button" id="editBtn" name="${btnNa}" value="${idEle}" class="btn btn-success btn-sm" >Edit</button>
-      <button type="button" id="deleteBtn" name="${btnNa}" value="${idEle}" class="btn btn-danger btn-sm">Delete</button>
+      <button type="button" id="editBtn" name="${btnName}" value="${idEle}" class="btn btn-success btn-sm" >Edit</button>
+      <button type="button" id="deleteBtn" name="${btnName}" value="${idEle}" class="btn btn-danger btn-sm">Delete</button>
     `;
     tableRow.appendChild(tBodyTdAct);
     tbody.appendChild(tableRow);
@@ -107,7 +106,7 @@ const CreateContentTBody = (tbody, tableData, btnNa) => {
   return tbody;
 };
 
-const CreateDataListTable = (data, tableInfo, mainContainer, btnNa) => {
+const CreateDataListTable = (data, tableInfo, mainContainer, btnName) => {
   mainContainer.innerHTML = "";
   let table = document.createElement("table");
   table.classList.add(
@@ -140,7 +139,7 @@ const CreateDataListTable = (data, tableInfo, mainContainer, btnNa) => {
   table.appendChild(tableHeader);
 
   let tableBody = document.createElement("tbody");
-  table.appendChild(CreateContentTBody(tableBody, data, btnNa));
+  table.appendChild(CreateContentTBody(tableBody, data, btnName));
 
   return table;
 };

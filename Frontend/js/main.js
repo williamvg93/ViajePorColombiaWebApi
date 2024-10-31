@@ -1,5 +1,5 @@
 import { CreateDataListTable, TableToContainer } from "./dynamicTables.js";
-import { CreateFormElements, CreateFormCont } from "./dynamicForms.js";
+import { FormElements, CreateFormCont } from "./dynamicForms.js";
 import { SendReguest } from "./crud.js";
 import { CreateMsgAlert } from "./msgAlert.js";
 
@@ -10,11 +10,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const mainPageTitle = document.querySelector("#mainTitle");
 
 
-  const ObtenerDataList = (url, method, tableInfo, btnNa, msg) => {
+  const ObtenerDataList = (url, method, tableInfo, btnName, msg) => {
 
     SendReguest(url, method, "")
       .then((data) => {
-        let table = CreateDataListTable(data, tableInfo, mainContainer, btnNa);
+        let table = CreateDataListTable(data, tableInfo, mainContainer, btnName);
         mainPageTitle.textContent = tableInfo;
         mainContainer.appendChild(TableToContainer(table));
 
@@ -23,19 +23,44 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         let btnDelete = document.querySelectorAll("#deleteBtn");
+        let btnUpdate = document.querySelectorAll("#editBtn");
         btnDelete.forEach(btn => {
           btn.addEventListener("click", (e) => {
             e.preventDefault();
             let urlEnti = e.target.getAttribute("name");
             let urlId = e.target.getAttribute("value");
-            let urlReq = `http://localhost:5287/ApiVPC/${urlEnti}/${urlId}`;
+            const urlReq = `http://localhost:5287/ApiVPC/${urlEnti}/${urlId}`;
             SendReguest(urlReq, "delete", "").then(
               (data) => {
                 console.log(data);
-                ObtenerDataList(url, method, tableInfo, btnNa, data);
+                ObtenerDataList(url, method, tableInfo, btnName, data);
               }
             );
             console.log(urlReq);
+          });
+        });
+
+        btnUpdate.forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            let urlEnti = e.target.getAttribute("name");
+            let urlId = e.target.getAttribute("value");
+            const urlReq = `http://localhost:5287/ApiVPC/${urlEnti}/${urlId}`;
+            SendReguest(urlReq, "get", "")
+            .then((data) => {
+              console.log(data);
+              prepararFormData(
+                `http://localhost:5287/ApiVPC/${btnName}`,
+                `Editar ${btnName}`,
+                data,
+                "put",
+                `Editar ${btnName}`,
+                ["btnEdit", `Edit ${btnName}`]
+              );
+            })
+            .catch((error) => {
+              console.log(error);
+            });
           });
         });
       })
@@ -44,23 +69,25 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   };
 
-  const prepararFormData = (url, formInfo, tbInfo, dataEle, dataBtn) => {
+  const prepararFormData = (url, formTitle, formData, formMethod, tableTitle, dataBtn) => {
     mainContainer.innerHTML = "";
     mainPageTitle.textContent = "";
 
-    let formElements = CreateFormElements(dataEle, "post", dataBtn);
-    let form = CreateFormCont(formElements, formInfo);
+    let formElements = FormElements(formData, formMethod, dataBtn);
+    let form = CreateFormCont(formElements, formTitle);
     mainContainer.appendChild(form);
 
-    let btnAdd = document.querySelector("#btnAdd"); 
-    btnAdd.addEventListener("click", (e) => {
+    let btnAddEv = formMethod == "post" ? "#btnAdd" : "#btnEdit";
+
+    let btnFunc = document.querySelector(btnAddEv); 
+    btnFunc.addEventListener("click", (e) => {
       e.preventDefault();
 
       let formAdd = document.querySelector("#formAdd");
       let dataF = new FormData(formAdd);
       let dataForm = {};
 
-      dataF.forEach((val,key) => {
+      dataF.forEach((val, key) => {
         if ((key == "price" || key == "trasportId") && val == "") {
           val = 0;
         }
@@ -73,12 +100,13 @@ document.addEventListener("DOMContentLoaded", () => {
           if (data.id) {
             let table = CreateDataListTable(
               data,
-              tbInfo,
-              mainContainer
+              tableTitle,
+              mainContainer,
+              dataBtn[2]
             );
             let tableContainer = document.createElement("div");
             tableContainer.classList.add("col");
-            mainPageTitle.textContent = tbInfo;
+            mainPageTitle.textContent = tableTitle;
             tableContainer.appendChild(table);
             mainContainer.appendChild(tableContainer);
           } else {
@@ -102,13 +130,12 @@ document.addEventListener("DOMContentLoaded", () => {
               msgAlert = CreateMsgAlert(data);
             }
             mainContainer.prepend(msgAlert);
-          }   
+          }
         })
-        .catch(error => {
+        .catch((error) => {
           console.error(error);
           let msgAlert = CreateMsgAlert(error);
           mainContainer.prepend(msgAlert);
-          
         });
     });
   }
@@ -147,34 +174,37 @@ document.addEventListener("DOMContentLoaded", () => {
           break;
         case "viajesform":
           dataForm = ["origin", "destination"];
-          dataBtn = ["btnAdd", "Consultar Viaje"];
+          dataBtn = ["btnAdd", "Consultar Viaje", "Flight"];
           prepararFormData(
             "http://localhost:5287/ApiVPC/Journey",
             "Consultar Viaje",
-            "Detalles del Viaje",
             dataForm,
+            "post",
+            "Detalles del Viaje",
             dataBtn
           );
           break;
         case "vueloform":
           dataForm = ["origin", "destination", "price", "trasportId"];
-          dataBtn = ["btnAdd", "Crear Vuelo"];
+          dataBtn = ["btnAdd", "Crear Vuelo", "Journey"];
           prepararFormData(
             "http://localhost:5287/ApiVPC/Flight",
             "Crear Vuelo",
-            "Detalle del Vuelo",
             dataForm,
+            "post",
+            "Detalle del Vuelo",
             dataBtn
           );
           break;
         case "transportform":
           dataForm = ["flightCarries", "flightNumber"];
-          dataBtn = ["btnAdd", "Crear Transporte"];
+          dataBtn = ["btnAdd", "Crear Transporte", "Transport"];
           prepararFormData(
             "http://localhost:5287/ApiVPC/Transport",
             "Crear Transporte",
-            "Detalle del Transporte",
             dataForm,
+            "post",
+            "Detalle del Transporte",
             dataBtn
           );
           break;
