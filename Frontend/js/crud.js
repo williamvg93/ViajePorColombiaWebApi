@@ -6,14 +6,17 @@ const SendReguest = async (url, method, dataForm) => {
     method: method,
     headers: { "content-Type": "application/json" },
   };
-/*   if (dataForm.hasOwnProperty("id")) {
-    console.log(dataForm.id);
-    confgFetch.body = dataForm.id;
-  } */
-  method == "post" && (confgFetch.body = dataForm);
+
+  (method == "post" || method == "put") && (confgFetch.body = dataForm);
 
   let peticion = await (await fetch(url, confgFetch)).json();
   return peticion;
 };
 
-export {SendReguest};
+
+const CreateUrl = (url, enti) => {
+  enti == "Flight" && (url += `Transport`);
+  return url;
+};
+
+export {SendReguest, CreateUrl};

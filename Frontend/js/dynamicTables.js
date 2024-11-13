@@ -34,30 +34,34 @@ const CreateContentTHead = (textColor, tableData) => {
 
 const CreateContentTBody = (tbody, tableData, btnName) => {
   let idEle;
+  console.log(tableData);
+  console.log(tableData[0]);
+  console.log(tableData[0] !== null && typeof tableData[0] === "object");
   if (tableData[0] !== null && typeof tableData[0] === "object") {
     tableData.forEach((elemArray) => {
-      idEle = "";
       let tableRow = document.createElement("tr");
       Object.keys(elemArray).forEach((key) => {
+        let tBodyTd = document.createElement("td");
         if (key === "id") {
+          tBodyTd.classList.add("idCel")
           idEle = elemArray[key];
         }
-        let tBodyTd = document.createElement("td");
         if (Array.isArray(elemArray[key])) {
           let flighInfo = "";
           elemArray[key].forEach((fli, index) => {
+            console.log(key);
+            console.log(`${fli} - ${index}`);
             Object.keys(fli).forEach((subkey) => {
+              console.log(fli[subkey]);
               flighInfo += `<b>${subkey.toUpperCase()}</b> : ${
                 fli[subkey]
               }</br>`;
             });
-            flighInfo += `</br>`;
+            flighInfo += `</br>`
+            console.log(flighInfo);
+            tBodyTd.innerHTML = flighInfo.slice(0, -5).trim();
           });
-          tBodyTd.innerHTML = flighInfo.slice(0, -5).trim();
         } else {
-          if (key === "id") {
-            idEle = elemArray[key];
-          }
           tBodyTd.innerHTML = `${elemArray[key]}`.trim();
         }
         tableRow.appendChild(tBodyTd);
@@ -89,6 +93,7 @@ const CreateContentTBody = (tbody, tableData, btnName) => {
         tBodyTd.innerHTML = flighInfo.slice(0, -5).trim();
       } else {
         if (key === "id") {
+          tBodyTd.classList.add("idCel");
           idEle = tableData[key];
         }
         tBodyTd.innerHTML = `${tableData[key]}`.trim();
@@ -102,12 +107,18 @@ const CreateContentTBody = (tbody, tableData, btnName) => {
     `;
     tableRow.appendChild(tBodyTdAct);
     tbody.appendChild(tableRow);
+    console.log(idEle);
   }
   return tbody;
 };
 
-const CreateDataListTable = (data, tableInfo, mainContainer, btnName) => {
-  mainContainer.innerHTML = "";
+const CreateTable = (data, title, container) => {
+
+  console.log(data);
+  console.log(typeof data);
+  console.log(data.length);
+  console.log(Object.keys(data).length);
+  container.innerHTML = "";
   let table = document.createElement("table");
   table.classList.add(
     "table",
@@ -122,7 +133,7 @@ const CreateDataListTable = (data, tableInfo, mainContainer, btnName) => {
   );
 
   let tableCaption = document.createElement("caption");
-  tableCaption.textContent = tableInfo;
+  tableCaption.textContent = title;
   tableCaption.classList.add("fs-5");
   table.appendChild(tableCaption);
 
@@ -134,16 +145,21 @@ const CreateDataListTable = (data, tableInfo, mainContainer, btnName) => {
     "border-white",
     "text-info"
   );
-  let theaderRow = CreateContentTHead("text-info", data);
-  tableHeader.appendChild(theaderRow);
-  table.appendChild(tableHeader);
 
   let tableBody = document.createElement("tbody");
-  table.appendChild(CreateContentTBody(tableBody, data, btnName));
+
+  if (data.length > 0 || Object.keys(data).length > 0) {
+    let theaderRow = CreateContentTHead("text-info", data);
+    tableHeader.appendChild(theaderRow);
+    table.appendChild(tableHeader);
+    table.appendChild(CreateContentTBody(tableBody, data, title));
+  } else {
+    tableBody.innerHTML = /* html */ `<td>No se encontraron Datos !!</td>`;
+    table.appendChild(tableBody);
+  }
 
   return table;
 };
 
 
-
-export { CreateDataListTable, TableToContainer };
+export { CreateTable, TableToContainer };

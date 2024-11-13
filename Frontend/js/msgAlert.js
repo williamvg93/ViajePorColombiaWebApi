@@ -1,10 +1,10 @@
 
-const CreateMsgAlert = (msg) => {
+const CreateMsgAlert = (msg, typeM = "danger") => {
     let msgAlert = document.createElement("div");
     msgAlert.setAttribute("role", "alert");
     msgAlert.classList.add(
       "alert",
-      "alert-danger",
+      `alert-${typeM}`,
       "alert-dismissible",
       "fade",
       "show"

@@ -1,209 +1,268 @@
-import { CreateDataListTable, TableToContainer } from "./dynamicTables.js";
-import { FormElements, CreateFormCont } from "./dynamicForms.js";
-import { SendReguest } from "./crud.js";
+import { CreateTable, TableToContainer } from "./dynamicTables.js";
+import { FormElements, CreateFormCont, CheckData } from "./dynamicForms.js";
 import { CreateMsgAlert } from "./msgAlert.js";
+import { CreateUrl, SendReguest } from "./crud.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-
-  const btnsForm = document.querySelectorAll(".btn_funtion");
+  const btnsNav = document.querySelectorAll(".btn_nav");
   const mainContainer = document.querySelector("#mainContent");
   const mainPageTitle = document.querySelector("#mainTitle");
 
+  const LoadActionBtns = (url, title) => {
+    const btnDelete = document.querySelectorAll("#deleteBtn");
+    const btnUpdate = document.querySelectorAll("#editBtn");
 
-  const ObtenerDataList = (url, method, tableInfo, btnName, msg) => {
+    btnDelete.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const idCel = e.target
+          .closest("tr")
+          .querySelector(".idCel").textContent;
+        console.log(idCel);
+        let urlEnti = e.target.getAttribute("name");
+        let urlId = idCel;
+        const urlReq = `http://localhost:5287/ApiVPC/${urlEnti}/${urlId}`;
+        SendReguest(urlReq, "delete", "").then((data) => {
+          console.log(data);
+          CreateDataList(url, title, data);
+        });
+      });
+    });
 
+    btnUpdate.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const idCel = e.target
+          .closest("tr")
+          .querySelector(".idCel").textContent;
+        console.log(idCel);
+        let urlEnti = e.target.getAttribute("name");
+        let urlId = idCel;
+
+        let urlReq = `http://localhost:5287/ApiVPC/${urlEnti}/${urlId}`;
+        if (title == "Flight") {
+          urlReq = `http://localhost:5287/ApiVPC/${urlEnti}/GetDataForUpdate/${urlId}`;
+        }
+        SendReguest(urlReq, "get", "")
+          .then((data) => {
+            let attForm = {
+              method: "put",
+              id: "formEdit",
+              title: `Editar ${title}`,
+              table: title,
+            };
+            let dataBtn = {
+              id: "btnEdit",
+              text: `Edit ${title}`,
+              value: urlId,
+            };
+
+            /* let urlReqFkData = `http://localhost:5287/ApiVPC/${title}`; */
+            if (title == "Flight") {
+              let urlReqFkData = CreateUrl(
+                "http://localhost:5287/ApiVPC/",
+                title
+              );
+              /* delete data.flightCarries */
+              SendReguest(urlReqFkData, "get", "")
+                .then((dataFk) => {
+                  data["TranspList"] = dataFk;
+                  console.log(dataFk);
+                  console.log(data);
+                  prepararFormData(
+                    `http://localhost:5287/ApiVPC/${title}`,
+                    attForm,
+                    data,
+                    `Editar ${title}`,
+                    dataBtn
+                  );
+                })
+                .catch((errorFk) => {
+                  console.log(errorFk);
+                });
+              console.log(data);
+            } else {
+              prepararFormData(
+                `http://localhost:5287/ApiVPC/${title}`,
+                attForm,
+                data,
+                `Editar ${title}`,
+                dataBtn
+              );
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      });
+    });
+  };
+
+  const CreateDataList = (url, title, msg = null, method = "get") => {
     SendReguest(url, method, "")
-      .then((data) => {
-        let table = CreateDataListTable(data, tableInfo, mainContainer, btnName);
-        mainPageTitle.textContent = tableInfo;
+      .then((dataList) => {
+        let table = CreateTable(dataList, title, mainContainer);
+        mainPageTitle.textContent = `${title} List`;
         mainContainer.appendChild(TableToContainer(table));
 
         if (msg !== null && typeof msg === "object") {
-          mainContainer.prepend(CreateMsgAlert(msg.success));
+          mainContainer.prepend(CreateMsgAlert(msg.success, "success"));
         }
 
-        let btnDelete = document.querySelectorAll("#deleteBtn");
-        let btnUpdate = document.querySelectorAll("#editBtn");
-        btnDelete.forEach(btn => {
-          btn.addEventListener("click", (e) => {
-            e.preventDefault();
-            let urlEnti = e.target.getAttribute("name");
-            let urlId = e.target.getAttribute("value");
-            const urlReq = `http://localhost:5287/ApiVPC/${urlEnti}/${urlId}`;
-            SendReguest(urlReq, "delete", "").then(
-              (data) => {
-                console.log(data);
-                ObtenerDataList(url, method, tableInfo, btnName, data);
-              }
-            );
-            console.log(urlReq);
-          });
-        });
-
-        btnUpdate.forEach((btn) => {
-          btn.addEventListener("click", (e) => {
-            e.preventDefault();
-            let urlEnti = e.target.getAttribute("name");
-            let urlId = e.target.getAttribute("value");
-            const urlReq = `http://localhost:5287/ApiVPC/${urlEnti}/${urlId}`;
-            SendReguest(urlReq, "get", "")
-            .then((data) => {
-              console.log(data);
-              prepararFormData(
-                `http://localhost:5287/ApiVPC/${btnName}`,
-                `Editar ${btnName}`,
-                data,
-                "put",
-                `Editar ${btnName}`,
-                ["btnEdit", `Edit ${btnName}`]
-              );
-            })
-            .catch((error) => {
-              console.log(error);
-            });
-          });
-        });
+        LoadActionBtns(url, title);
       })
       .catch((error) => {
         console.error("Error en la consulta: ", error);
       });
   };
 
-  const prepararFormData = (url, formTitle, formData, formMethod, tableTitle, dataBtn) => {
+  const prepararFormData = (url, formAtt, formData, tableTitle, dataBtn) => {
     mainContainer.innerHTML = "";
     mainPageTitle.textContent = "";
 
-    let formElements = FormElements(formData, formMethod, dataBtn);
-    let form = CreateFormCont(formElements, formTitle);
+    let formElements = FormElements(formData, formAtt, dataBtn);
+    let form = CreateFormCont(formElements, formAtt.title);
     mainContainer.appendChild(form);
 
-    let btnAddEv = formMethod == "post" ? "#btnAdd" : "#btnEdit";
-
-    let btnFunc = document.querySelector(btnAddEv); 
-    btnFunc.addEventListener("click", (e) => {
+    /*  let btnAddEv = formAtt[1] == "post" ? "#btnAdd" : "#btnEdit"; */
+    let btnSubmit = document.querySelector(`#${dataBtn.id}`);
+    btnSubmit.addEventListener("click", (e) => {
       e.preventDefault();
 
-      let formAdd = document.querySelector("#formAdd");
-      let dataF = new FormData(formAdd);
+      let dataF = new FormData(document.querySelector(`#${formAtt.id}`));
+      console.log(dataF);
       let dataForm = {};
 
       dataF.forEach((val, key) => {
         if ((key == "price" || key == "trasportId") && val == "") {
           val = 0;
         }
-        dataForm[key] = val === "" ? null : val;
+        dataForm[key] = val;
       });
+
       console.log(dataForm);
+      const dataChecked = CheckData(dataForm);
 
-      SendReguest(url, "post", JSON.stringify(dataForm))
-        .then((data) => {
-          if (data.id) {
-            let table = CreateDataListTable(
-              data,
-              tableTitle,
-              mainContainer,
-              dataBtn[2]
-            );
-            let tableContainer = document.createElement("div");
-            tableContainer.classList.add("col");
-            mainPageTitle.textContent = tableTitle;
-            tableContainer.appendChild(table);
-            mainContainer.appendChild(tableContainer);
-          } else {
-            let msgErrors, msgAlert;
-            console.log(data);
-            if (data.errors || data.error) {
-              if (data.errors) {
-                msgErrors += `<strong>${data.title}</strong>: `;
-                Object.keys(data.errors).forEach((key) => {
-                  let msgError = data.errors[key];
-                  msgError.forEach((msg) => {
-                    msgErrors += `${msg}\n`;
-                  });
-                });
-                msgAlert = CreateMsgAlert(msgErrors);
-              }
-              if (data.error) {
-                msgAlert = CreateMsgAlert(data.error);
-              }
+      if (!dataChecked.status) {
+        mainContainer.prepend(CreateMsgAlert(dataChecked.msg));
+      } else {
+        if (formAtt.method == "put") {
+          url += `/${btnSubmit.getAttribute("value")}`;
+          console.log(url);
+        }
+        SendReguest(url, formAtt.method, JSON.stringify(dataForm))
+          .then((data) => {
+            if (data.id) {
+              let table = CreateTable(data, formAtt.table, mainContainer);
+              mainPageTitle.textContent = tableTitle;
+              mainContainer.appendChild(TableToContainer(table));
+              LoadActionBtns(url, formAtt.table);
             } else {
-              msgAlert = CreateMsgAlert(data);
+              let msgErrors, msgAlert;
+              console.log(data);
+              if (data.errors || data.error) {
+                if (data.errors) {
+                  msgErrors += `<strong>${data.title}</strong>: `;
+                  Object.keys(data.errors).forEach((key) => {
+                    let msgError = data.errors[key];
+                    msgError.forEach((msg) => {
+                      msgErrors += `${msg}\n`;
+                    });
+                  });
+                  msgAlert = CreateMsgAlert(msgErrors);
+                }
+                if (data.error) {
+                  msgAlert = CreateMsgAlert(data.error);
+                }
+              } else {
+                msgAlert = CreateMsgAlert(data);
+              }
+              mainContainer.prepend(msgAlert);
             }
+          })
+          .catch((error) => {
+            console.error(error);
+            let msgAlert = CreateMsgAlert(error);
             mainContainer.prepend(msgAlert);
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-          let msgAlert = CreateMsgAlert(error);
-          mainContainer.prepend(msgAlert);
-        });
+          });
+      }
     });
-  }
+  };
 
-  btnsForm.forEach((btn) => {
+  btnsNav.forEach((btn) => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
-      let dataForm, dataBtn;
+      let dataForm;
+      let attForm = {
+        method: "post",
+        id: "formAdd",
+      };
+      let dataBtn = {
+        id: "btnAdd",
+      };
+
       switch (e.target.getAttribute("id")) {
         case "viajesList":
-          ObtenerDataList(
-            "http://localhost:5287/ApiVPC/Journey",
-            "get",
-            "Journey List",
-            "Journey",
-            null
-          );
+          CreateDataList("http://localhost:5287/ApiVPC/Journey", "Journey");
           break;
         case "vuelosList":
-          ObtenerDataList(
-            "http://localhost:5287/ApiVPC/Flight",
-            "get",
-            "Flight List",
-            "Flight",
-            null
-          );
+          CreateDataList("http://localhost:5287/ApiVPC/Flight", "Flight");
           break;
         case "transporteList":
-          ObtenerDataList(
-            "http://localhost:5287/ApiVPC/Transport",
-            "get",
-            "Transport List",
-            "Transport",
-            null
-          );
+          CreateDataList("http://localhost:5287/ApiVPC/Transport", "Transport");
           break;
         case "viajesform":
           dataForm = ["origin", "destination"];
-          dataBtn = ["btnAdd", "Consultar Viaje", "Flight"];
+          Object.assign(attForm, {
+            title: "Consultar Viaje",
+            table: "Journey",
+          });
+          Object.assign(dataBtn, { text: "Consultar Viaje" });
           prepararFormData(
             "http://localhost:5287/ApiVPC/Journey",
-            "Consultar Viaje",
+            attForm,
             dataForm,
-            "post",
-            "Detalles del Viaje",
+            "Detalle del Viaje",
             dataBtn
           );
           break;
         case "vueloform":
-          dataForm = ["origin", "destination", "price", "trasportId"];
-          dataBtn = ["btnAdd", "Crear Vuelo", "Journey"];
-          prepararFormData(
-            "http://localhost:5287/ApiVPC/Flight",
-            "Crear Vuelo",
-            dataForm,
-            "post",
-            "Detalle del Vuelo",
-            dataBtn
-          );
+          SendReguest("http://localhost:5287/ApiVPC/Transport", "get", "")
+            .then((dataFk) => {
+              console.log(dataFk);
+              dataForm = ["origin", "destination", "price", "trasportId"];
+              dataForm.push(dataFk);
+              console.log(dataForm);
+              Object.assign(attForm, {
+                title: "Crear Vuelo",
+                table: "Flight",
+              });
+              Object.assign(dataBtn, { text: "Crear Vuelo" });
+              prepararFormData(
+                "http://localhost:5287/ApiVPC/Flight",
+                attForm,
+                dataForm,
+                "Detalle del Vuelo",
+                dataBtn
+              );
+            })
+            .catch((errorFk) => {
+              console.log(errorFk);
+            });
           break;
         case "transportform":
           dataForm = ["flightCarries", "flightNumber"];
-          dataBtn = ["btnAdd", "Crear Transporte", "Transport"];
+          Object.assign(attForm, {
+            title: "Crear Transporte",
+            table: "Transport",
+          });
+          Object.assign(dataBtn, {
+            text: "Crear Transporte"
+          });
           prepararFormData(
             "http://localhost:5287/ApiVPC/Transport",
-            "Crear Transporte",
+            attForm,
             dataForm,
-            "post",
             "Detalle del Transporte",
             dataBtn
           );
@@ -213,9 +272,4 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
-
 });
-
-
-
-
