@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ApiVPC.DTOs;
 using ApiVPC.DTOs.Get;
+using ApiVPC.DTOs.Get.FlightTransport;
 using ApiVPC.Services;
 using AutoMapper;
 using Domain.entities;
@@ -33,7 +34,7 @@ namespace ApiVPC.Controller
         {
             return _mapper.Map<List<FlightTransDto>>(await _flightService.GetList());
         }
-    
+
         /* Get Data by ID */
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -45,7 +46,19 @@ namespace ApiVPC.Controller
             if (flight == null) return NotFound( new {error = $"There are no data with this ID: ('{id}')" } );
             return _mapper.Map<FlightTransDto>(flight);
         }
-    
+
+        /* Get Data whit your trasport from Table */
+        [HttpGet("GetDataForUpdate/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<FlightDto>> GetDataForUpdate(int id)
+        {
+            var flight = await _flightService.GetById(id);
+            if (flight == null) return NotFound(new { error = $"There are no data with this ID: ('{id}')" });
+            return _mapper.Map<FlightDto>(flight);
+        }
+
         /* Add a new Data in the Table */
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
